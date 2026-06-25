@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tena Juniors</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@600;700&display=swap');
+:root {
+  --navy:#0D1B3E;--navy2:#1A3A8F;--blue:#2451C7;--sky:#5B8AF0;
+  --gold:#F5C800;--white:#FFFFFF;--off:#F7F9FF;--muted:#8899BB;
+  --border:#E2E9F7;--green:#1B8A4E;--green-bg:#E8F5EE;
+  --red:#C0392B;--red-bg:#FDECEA;--orange:#D46B08;--orange-bg:#FFF7E0;--text:#0D1B3E;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);display:flex;flex-direction:column;height:100dvh;}
+
+/* PORTADA */
+#portada{display:flex;flex-direction:column;align-items:center;justify-content:center;
+background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 55%,#1a4db5 100%);
+height:100dvh;position:fixed;inset:0;z-index:900;transition:opacity .5s,transform .5s;}
+#portada.oculto{opacity:0;pointer-events:none;transform:scale(1.04);}
+.portada-escudo{width:110px;height:110px;background:var(--gold);border-radius:50%;
+display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+box-shadow:0 0 0 8px rgba(245,200,0,.15),0 0 0 20px rgba(245,200,0,.06);position:relative;}
+.escudo-inner{font-family:'Oswald',sans-serif;font-size:26px;color:var(--navy);font-weight:700;letter-spacing:1px;text-align:center;line-height:1.1;}
+.escudo-ball{position:absolute;right:-6px;bottom:-4px;font-size:26px;}
+.portada-titulo{font-family:'Oswald',sans-serif;font-size:36px;color:var(--white);letter-spacing:3px;text-align:center;line-height:1;}
+.portada-sub{font-size:13px;color:rgba(255,255,255,.55);letter-spacing:2px;text-transform:uppercase;margin-top:6px;margin-bottom:32px;}
+.portada-stats{display:flex;gap:32px;margin-bottom:36px;}
+.pstat{text-align:center;}
+.pstat-num{font-family:'Oswald',sans-serif;font-size:30px;color:var(--gold);line-height:1;}
+.pstat-label{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.btn-entrar{background:var(--gold);color:var(--navy);border:none;border-radius:14px;padding:15px 48px;
+font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;
+box-shadow:0 8px 24px rgba(245,200,0,.35);transition:transform .1s;}
+.btn-entrar:active{transform:scale(.97);}
+.portada-cats{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap;justify-content:center;padding:0 24px;}
+.cat-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+color:rgba(255,255,255,.6);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.5px;}
+
+/* HEADER */
+#appHeader{background:var(--navy);color:white;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.app-logo{width:36px;height:36px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;
+font-family:'Oswald',sans-serif;font-size:10px;color:var(--navy);font-weight:700;flex-shrink:0;letter-spacing:.3px;text-align:center;line-height:1.1;}
+.app-header-title{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1.5px;}
+.app-header-sub{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:1px;}
+.header-right-btn{margin-left:auto;background:rgba(255,255,255,.1);border:none;border-radius:8px;
+color:white;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
+
+/* TABS */
+#tabs{background:var(--navy);display:flex;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.tab-btn{flex:1;padding:10px 4px 8px;border:none;background:none;color:rgba(255,255,255,.38);
+font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;
+display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;}
+.tab-btn .icon{font-size:18px;}
+.tab-btn.active{color:var(--gold);}
+
+/* SCROLL */
+#appBody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.panel{display:none;padding:16px;}
+.panel.active{display:block;}
+
+/* TYPOGRAPHY */
+.sec-title{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;
+color:var(--muted);margin:20px 0 10px;}
+.sec-title:first-child{margin-top:0;}
+
+/* CAT STRIP */
+.cat-strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none;}
+.cat-strip::-webkit-scrollbar{display:none;}
+.cat-pill{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);
+background:white;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.cat-pill.active{background:var(--navy);color:var(--gold);border-color:var(--navy);}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:14px;}
+.search-wrap input{width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);
+border-radius:12px;font-family:'Inter',sans-serif;font-size:14px;background:white;color:var(--text);}
+.search-wrap input:focus{outline:none;border-color:var(--sky);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);}
+
+/* JUGADOR CARD */
+.j-card{background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden;cursor:pointer;transition:transform .12s;}
+.j-card:active{transform:scale(.99);}
+.j-card-head{display:flex;align-items:center;padding:12px 14px;gap:12px;}
+.j-avatar{width:40px;height:40px;border-radius:10px;background:var(--navy);display:flex;align-items:center;justify-content:center;
+font-family:'Oswald',sans-serif;font-size:15px;color:var(--gold);flex-shrink:0;}
+.j-info{flex:1;min-width:0;}
+.j-nombre{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.j-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.j-cat-badge{background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:var(--navy);flex-shrink:0;}
+.j-card-footer{border-top:1px solid var(--border);padding:8px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.badge-mini{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+.badge-green{background:var(--green-bg);color:var(--green);}
+.badge-red{background:var(--red-bg);color:var(--red);}
+.badge-orange{background:var(--orange-bg);color:var(--orange);}
+.badge-blue{background:#EBF0FF;color:var(--blue);}
+
+/* FAB */
+.fab{position:fixed;right:20px;bottom:80px;width:54px;height:54px;background:var(--blue);
+border-radius:50%;border:none;color:white;font-size:26px;cursor:pointer;
+box-shadow:0 6px 20px rgba(36,81,199,.4);display:flex;align-items:center;justify-content:center;
+z-index:50;transition:transform .15s;}
+.fab:active{transform:scale(.93);}
+
+/* OVERLAY / DRAWER */
+.overlay{position:fixed;inset:0;background:rgba(13,27,62,.6);z-index:200;display:none;align-items:flex-end;}
+.overlay.open{display:flex;}
+.drawer{background:var(--off);border-radius:22px 22px 0 0;padding:8px 0 0;width:100%;max-height:92dvh;overflow-y:auto;animation:slideUp .25s cubic-bezier(.22,1,.36,1);}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.drawer-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.drawer-content{padding:0 16px 32px;}
+.drawer-title{font-family:'Oswald',sans-serif;font-size:20px;color:var(--navy);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.btn-x{background:var(--border);border:none;border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+
+/* FORM */
+.f-group{margin-bottom:14px;}
+.f-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.f-input,.f-select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
+font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:white;-webkit-appearance:none;transition:border-color .15s;}
+.f-input:focus,.f-select:focus{outline:none;border-color:var(--sky);}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+textarea.f-input{resize:vertical;min-height:80px;font-family:'Inter',sans-serif;}
+
+/* MESES */
+.meses-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;}
+.m-btn{padding:8px 4px;border-radius:9px;border:1.5px solid var(--border);background:white;
+font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;font-family:'Inter',sans-serif;transition:all .12s;}
+.m-btn.on{background:var(--green);border-color:var(--green);color:white;}
+
+/* ESTRELLAS */
+.estrellas{display:flex;gap:6px;margin-top:4px;}
+.estrella{font-size:28px;cursor:pointer;transition:transform .1s;opacity:.3;filter:grayscale(1);}
+.estrella.on{opacity:1;filter:none;}
+.estrella:active{transform:scale(.85);}
+
+/* BOTONES */
+.btn-primary{width:100%;padding:14px;background:var(--navy);color:white;border:none;border-radius:14px;
+font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:transform .1s;}
+.btn-primary:active{transform:scale(.98);}
+.btn-secondary{width:100%;padding:12px;background:transparent;color:var(--navy);border:1.5px solid var(--border);
+border-radius:14px;font-family:'Inter',sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-top:8px;}
+.btn-danger{width:100%;padding:12px;background:var(--red-bg);color:var(--red);border:1.5px solid #f5c6c2;
+border-radius:14px;font-family:'Inter',sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-top:8px;}
+
+/* FICHA */
+.ficha-card{background:white;border-radius:16px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:16px;}
+.ficha-header{background:var(--navy);padding:16px;display:flex;gap:14px;align-items:center;}
+.ficha-avatar{width:56px;height:56px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;
+font-family:'Oswald',sans-serif;font-size:22px;color:var(--navy);flex-shrink:0;}
+.ficha-nombre{font-family:'Oswald',sans-serif;font-size:20px;color:white;line-height:1;}
+.ficha-cat{font-size:12px;color:var(--gold);margin-top:3px;font-weight:600;letter-spacing:1px;}
+.ficha-club{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;letter-spacing:1px;}
+.ficha-body{padding:14px 16px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.info-cell-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.info-cell-val{font-size:14px;font-weight:600;color:var(--text);margin-top:2px;}
+.divider{height:1px;background:var(--border);margin:12px 0;}
+.meses-estado{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.mes-tag{padding:4px 9px;border-radius:7px;font-size:11px;font-weight:700;}
+.mes-tag.pagado{background:var(--green-bg);color:var(--green);}
+.mes-tag.pendiente{background:var(--red-bg);color:var(--red);}
+.ficha-footer{padding:10px 16px 14px;background:var(--off);border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center;}
+
+/* NOTA DE VENTA */
+.nota-card{background:white;border-radius:16px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:16px;}
+.nota-header{background:var(--navy);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+.nota-num{font-family:'Oswald',sans-serif;font-size:16px;color:var(--gold);letter-spacing:1px;}
+.nota-fecha{font-size:11px;color:rgba(255,255,255,.5);}
+.nota-body{padding:14px 16px;}
+.nota-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13px;}
+.nota-row:last-child{border-bottom:none;}
+.nota-label{color:var(--muted);}
+.nota-val{font-weight:700;}
+.nota-total{background:var(--off);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.nota-total-label{font-weight:700;font-size:14px;}
+.nota-total-val{font-family:'Oswald',sans-serif;font-size:26px;color:var(--navy);}
+
+/* CONCEPTO ITEM */
+.concepto-item{display:flex;align-items:center;gap:10px;background:white;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.concepto-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);flex-shrink:0;}
+.concepto-label{flex:1;font-size:13px;font-weight:600;}
+.precio-input{width:80px;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;text-align:right;font-family:'Inter',sans-serif;}
+
+/* PAGOS */
+.pagos-card{background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:12px;}
+.pagos-head{padding:10px 14px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;color:white;}
+.pagos-head.verde{background:var(--green);}
+.pagos-head.rojo{background:var(--red);}
+.pagos-head.morado{background:#5C6BC0;}
+.pago-item{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+.pago-item:last-child{border-bottom:none;}
+.pago-nombre{font-weight:600;}
+.pago-cat{font-size:11px;color:var(--muted);}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat-box{background:white;border-radius:14px;border:1.5px solid var(--border);padding:14px;text-align:center;}
+.stat-n{font-family:'Oswald',sans-serif;font-size:32px;line-height:1;color:var(--navy);}
+.stat-lbl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;}
+.bar-box{background:white;border-radius:14px;border:1.5px solid var(--border);padding:14px;margin-bottom:10px;}
+.bar-title{font-family:'Oswald',sans-serif;font-size:14px;color:var(--navy);margin-bottom:12px;letter-spacing:1px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.bar-label{font-size:12px;font-weight:600;width:64px;flex-shrink:0;}
+.bar-track{flex:1;background:var(--off);border-radius:4px;height:14px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--navy2),var(--blue));border-radius:4px;transition:width .5s;}
+.bar-count{font-size:12px;font-weight:700;color:var(--navy);width:20px;text-align:right;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty-state .ei{font-size:44px;margin-bottom:12px;}
+.empty-state p{font-size:13px;line-height:1.5;}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(30px);
+background:var(--navy);color:white;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;
+z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* BACKUP BANNER */
+.backup-bar{background:#1a3a8f;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;flex-shrink:0;}
+.backup-bar button{background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div id="portada">
+  <div class="portada-escudo">
+    <div class="escudo-inner">TENA<br>JRS</div>
+    <div class="escudo-ball">⚽</div>
+  </div>
+  <div class="portada-titulo">TENA JUNIORS</div>
+  <div class="portada-sub">Escuela de Fútbol · Tena, Ecuador</div>
+  <div class="portada-stats">
+    <div class="pstat"><div class="pstat-num" id="ps-total">0</div><div class="pstat-label">Alumnos</div></div>
+    <div class="pstat"><div class="pstat-num" id="ps-cats">0</div><div class="pstat-label">Categorías</div></div>
+    <div class="pstat"><div class="pstat-num" id="ps-pagaron">0</div><div class="pstat-label">Al día</div></div>
+  </div>
+  <button class="btn-entrar" onclick="entrar()">ENTRAR</button>
+  <div class="portada-cats" id="portada-cats"></div>
+</div>
+
+<!-- APP HEADER -->
+<div id="appHeader" style="display:none">
+  <div class="app-logo">TENA<br>JRS</div>
+  <div>
+    <div class="app-header-title">TENA JUNIORS</div>
+    <div class="app-header-sub">ESCUELA DE FÚTBOL</div>
+  </div>
+  <button class="header-right-btn" onclick="volverPortada()">⬅ Inicio</button>
+</div>
+
+<!-- BACKUP BAR -->
+<div class="backup-bar" id="backupBar" style="display:none">
+  <span>💾 Exportar respaldo de datos</span>
+  <button onclick="exportarRespaldo()">Exportar</button>
+</div>
+
+<!-- TABS -->
+<div id="tabs" style="display:none">
+  <button class="tab-btn active" onclick="switchTab('alumnos')" id="tab-alumnos"><span class="icon">👥</span>Alumnos</button>
+  <button class="tab-btn" onclick="switchTab('pagos')" id="tab-pagos"><span class="icon">💰</span>Pagos</button>
+  <button class="tab-btn" onclick="switchTab('fichas')" id="tab-fichas"><span class="icon">📋</span>Fichas</button>
+  <button class="tab-btn" onclick="switchTab('ventas')" id="tab-ventas"><span class="icon">🧾</span>Ventas</button>
+  <button class="tab-btn" onclick="switchTab('stats')" id="tab-stats"><span class="icon">📊</span>Resumen</button>
+</div>
+
+<div id="appBody" style="display:none">
+
+  <!-- ALUMNOS -->
+  <div class="panel active" id="panel-alumnos">
+    <div class="cat-strip" id="catStrip">
+      <div class="cat-pill active" data-cat="" onclick="selectCat(this)">Todos</div>
+      <div class="cat-pill" data-cat="Sub-8"    onclick="selectCat(this)">Sub-8</div>
+      <div class="cat-pill" data-cat="Sub-10"   onclick="selectCat(this)">Sub-10</div>
+      <div class="cat-pill" data-cat="Sub-12"   onclick="selectCat(this)">Sub-12</div>
+      <div class="cat-pill" data-cat="Sub-14"   onclick="selectCat(this)">Sub-14</div>
+      <div class="cat-pill" data-cat="Sub-16"   onclick="selectCat(this)">Sub-16</div>
+      <div class="cat-pill" data-cat="Primera"  onclick="selectCat(this)">Primera</div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="buscar" placeholder="Buscar alumno…" oninput="renderAlumnos()">
+    </div>
+    <div id="listaAlumnos"></div>
+  </div>
+
+  <!-- PAGOS -->
+  <div class="panel" id="panel-pagos"><div id="pagosContent"></div></div>
+
+  <!-- FICHAS -->
+  <div class="panel" id="panel-fichas">
+    <div class="sec-title">Seleccionar alumno</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="buscarFicha" placeholder="Buscar para generar ficha…" oninput="renderFichaSelector()">
+    </div>
+    <div id="fichaSelector"></div>
+    <div id="fichaVista"></div>
+  </div>
+
+  <!-- VENTAS -->
+  <div class="panel" id="panel-ventas">
+    <div class="sec-title">Nueva nota de venta</div>
+    <div class="f-group">
+      <label class="f-label">Alumno</label>
+      <select class="f-select" id="ventaAlumno" onchange="actualizarNota()">
+        <option value="">Seleccionar alumno…</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Conceptos</label>
+      <div id="conceptosLista"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="text" class="f-input" id="conceptoExtra" placeholder="Concepto adicional…" style="flex:1;padding:10px 12px">
+        <input type="number" class="precio-input" id="conceptoMonto" placeholder="$">
+        <button onclick="agregarConceptoExtra()" style="background:var(--navy);color:white;border:none;border-radius:10px;padding:0 16px;font-size:20px;cursor:pointer;flex-shrink:0">+</button>
+      </div>
+    </div>
+    <div id="notaVentaVista"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="panel" id="panel-stats">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-n" id="st-total">0</div><div class="stat-lbl">Total Alumnos</div></div>
+      <div class="stat-box"><div class="stat-n" id="st-pagaron" style="color:var(--green)">0</div><div class="stat-lbl">Pagaron este mes</div></div>
+      <div class="stat-box"><div class="stat-n" id="st-deben" style="color:var(--red)">0</div><div class="stat-lbl">Pendiente pago</div></div>
+      <div class="stat-box"><div class="stat-n" id="st-uniforme">0</div><div class="stat-lbl">Unif. entregado</div></div>
+    </div>
+    <div class="bar-box">
+      <div class="bar-title">POR CATEGORÍA</div>
+      <div id="catBars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="abrirFormNuevo()" style="display:none">+</button>
+
+<!-- DRAWER ALUMNO -->
+<div class="overlay" id="overlayAlumno" onclick="cerrarOverlay('overlayAlumno',event)">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-content">
+      <div class="drawer-title">
+        <span id="formTitulo">Nuevo Jugador</span>
+        <button class="btn-x" onclick="cerrarDrawer('overlayAlumno')">✕</button>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Nombre completo *</label>
+        <input class="f-input" type="text" id="f-nombre" placeholder="Ej: Carlos Tipán">
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label class="f-label">Fecha de nacimiento</label>
+          <input class="f-input" type="date" id="f-fecha">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Edad</label>
+          <input class="f-input" type="number" id="f-edad" placeholder="9" min="4" max="22">
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Categoría *</label>
+        <select class="f-select" id="f-cat">
+          <option value="">Seleccionar…</option>
+          <option>Sub-8</option><option>Sub-10</option><option>Sub-12</option>
+          <option>Sub-14</option><option>Sub-16</option><option>Primera</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Posición</label>
+        <select class="f-select" id="f-posicion">
+          <option value="">Sin definir</option>
+          <option>Portero</option><option>Defensa</option><option>Lateral</option>
+          <option>Volante</option><option>Mediocampista</option><option>Extremo</option><option>Delantero</option>
+        </select>
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label class="f-label">Representante</label>
+          <input class="f-input" type="text" id="f-rep" placeholder="Nombre">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Celular</label>
+          <input class="f-input" type="tel" id="f-cel" placeholder="0999…">
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Uniforme</label>
+        <select class="f-select" id="f-uniforme">
+          <option value="pendiente">⏳ Pendiente</option>
+          <option value="pagado">✅ Pagado</option>
+          <option value="entregado">🎽 Entregado</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Meses pagados (desde Junio)</label>
+        <div class="meses-grid" id="mesesForm"></div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Conducta ⭐ (toca para calificar)</label>
+        <div class="estrellas" id="estrellasForm">
+          <span class="estrella" onclick="setEstrella(1)">⭐</span>
+          <span class="estrella" onclick="setEstrella(2)">⭐</span>
+          <span class="estrella" onclick="setEstrella(3)">⭐</span>
+          <span class="estrella" onclick="setEstrella(4)">⭐</span>
+          <span class="estrella" onclick="setEstrella(5)">⭐</span>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Aspectos a mejorar</label>
+        <textarea class="f-input" id="f-mejorar" placeholder="Ej: Mejorar posicionamiento defensivo, trabajar pase con pie izquierdo…"></textarea>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Notas del entrenador</label>
+        <textarea class="f-input" id="f-notas" placeholder="Observaciones generales del jugador…"></textarea>
+      </div>
+      <button class="btn-primary" onclick="guardarAlumno()">GUARDAR JUGADOR</button>
+      <button class="btn-danger" id="btnEliminar" onclick="eliminarAlumno()" style="display:none">Eliminar jugador</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// STORAGE — guarda en localStorage Y en cookie como doble respaldo
+// ══════════════════════════════════════════════════════════
+const KEY = 'tj_alumnos_v2';
+const KEY_NOTA = 'tj_nota_v2';
+
+function guardarDatos(arr) {
+  const json = JSON.stringify(arr);
+  // 1. localStorage
+  try { localStorage.setItem(KEY, json); } catch(e){}
+  // 2. sessionStorage como copia
+  try { sessionStorage.setItem(KEY, json); } catch(e){}
+  // 3. Cookie (hasta 1 año, 4KB máx — suficiente para muchos alumnos)
+  try {
+    const expire = new Date();
+    expire.setFullYear(expire.getFullYear() + 1);
+    document.cookie = KEY + '=' + encodeURIComponent(json) + ';expires=' + expire.toUTCString() + ';path=/;SameSite=Lax';
+  } catch(e){}
+}
+
+function cargarDatos() {
+  // Intenta las 3 fuentes en orden
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(KEY)); } catch(e){}
+  if (!data || !data.length) {
+    try { data = JSON.parse(sessionStorage.getItem(KEY)); } catch(e){}
+  }
+  if (!data || !data.length) {
+    try {
+      const match = document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)'));
+      if (match) data = JSON.parse(decodeURIComponent(match[1]));
+    } catch(e){}
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+function getNotaCounter() {
+  let n = 1;
+  try { n = parseInt(localStorage.getItem(KEY_NOTA)) || 1; } catch(e){}
+  return n;
+}
+function saveNotaCounter(n) {
+  try { localStorage.setItem(KEY_NOTA, n); } catch(e){}
+  try {
+    const exp = new Date(); exp.setFullYear(exp.getFullYear()+1);
+    document.cookie = KEY_NOTA+'='+n+';expires='+exp.toUTCString()+';path=/;SameSite=Lax';
+  } catch(e){}
+}
+
+// ══════════════════════════════════════════════════════════
+// CONSTANTES
+// ══════════════════════════════════════════════════════════
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MES_INICIO = 5;
+const MES_ACTUAL = new Date().getMonth();
+const AÑO = new Date().getFullYear();
+const CATS = ['Sub-8','Sub-10','Sub-12','Sub-14','Sub-16','Primera'];
+
+let catFiltro = '';
+let editandoId = null;
+let mesesSel = [];
+let conductaSel = 0;
+let conceptosBase = [];
+let notaCounter = getNotaCounter();
+
+// ══════════════════════════════════════════════════════════
+// PORTADA
+// ══════════════════════════════════════════════════════════
+function updatePortada() {
+  const a = cargarDatos();
+  document.getElementById('ps-total').textContent = a.length;
+  document.getElementById('ps-cats').textContent  = new Set(a.map(x=>x.cat)).size;
+  document.getElementById('ps-pagaron').textContent = a.filter(x=>(x.meses||[]).includes(MES_ACTUAL)).length;
+  const catsActivas = CATS.filter(c => a.some(x=>x.cat===c));
+  document.getElementById('portada-cats').innerHTML = catsActivas.map(c=>{
+    const n = a.filter(x=>x.cat===c).length;
+    return `<div class="cat-chip">${c} · ${n}</div>`;
+  }).join('');
+}
+
+function entrar() {
+  document.getElementById('portada').classList.add('oculto');
+  ['appHeader','backupBar','tabs','appBody'].forEach(id => document.getElementById(id).style.display = id==='appBody'?'block':'flex');
+  document.getElementById('fabBtn').style.display = 'flex';
+  renderAlumnos();
+}
+
+function volverPortada() {
+  updatePortada();
+  document.getElementById('portada').classList.remove('oculto');
+  ['appHeader','backupBar','tabs','appBody','fabBtn'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+
+// ══════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('fabBtn').style.display = name==='alumnos' ? 'flex' : 'none';
+  if(name==='alumnos') renderAlumnos();
+  if(name==='pagos')   renderPagos();
+  if(name==='fichas')  renderFichaSelector();
+  if(name==='ventas')  initVentas();
+  if(name==='stats')   renderStats();
+}
+
+function selectCat(el) {
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  catFiltro = el.dataset.cat;
+  renderAlumnos();
+}
+
+// ══════════════════════════════════════════════════════════
+// LISTA ALUMNOS
+// ══════════════════════════════════════════════════════════
+function iniciales(n) { return (n||'').split(' ').slice(0,2).map(p=>p[0]||'').join('').toUpperCase(); }
+
+function renderAlumnos() {
+  const buscar = (document.getElementById('buscar').value||'').toLowerCase();
+  let lista = cargarDatos();
+  if(catFiltro) lista = lista.filter(j=>j.cat===catFiltro);
+  if(buscar)    lista = lista.filter(j=>j.nombre.toLowerCase().includes(buscar));
+  const el = document.getElementById('listaAlumnos');
+  if(!lista.length){
+    el.innerHTML=`<div class="empty-state"><div class="ei">⚽</div><p>${buscar||catFiltro?'Sin resultados':'Aún no hay alumnos.<br>Toca + para agregar.'}</p></div>`;
+    return;
+  }
+  el.innerHTML = lista.map(j=>{
+    const pagMes = (j.meses||[]).includes(MES_ACTUAL);
+    const estrellas = j.conducta ? '⭐'.repeat(j.conducta) : '';
+    const uBadge = j.uniforme==='entregado'?'<span class="badge-mini badge-green">🎽 Uniforme</span>'
+                 : j.uniforme==='pagado'   ?'<span class="badge-mini badge-blue">✅ Unif.</span>':'';
+    return `<div class="j-card" onclick="abrirEditar(${j.id})">
+      <div class="j-card-head">
+        <div class="j-avatar">${iniciales(j.nombre)}</div>
+        <div class="j-info">
+          <div class="j-nombre">${j.nombre}</div>
+          <div class="j-meta">${j.posicion||'Sin posición'} · ${j.edad?j.edad+' años':'—'} ${estrellas?'· '+estrellas:''}</div>
+        </div>
+        <div class="j-cat-badge">${j.cat}</div>
+      </div>
+      <div class="j-card-footer">
+        ${pagMes?'<span class="badge-mini badge-green">✓ Pagó '+MESES[MES_ACTUAL]+'</span>':'<span class="badge-mini badge-red">✗ Debe '+MESES[MES_ACTUAL]+'</span>'}
+        ${uBadge}
+        <span style="margin-left:auto;font-size:11px;color:var(--muted)">Editar ›</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// MESES & ESTRELLAS
+// ══════════════════════════════════════════════════════════
+function buildMeses() {
+  const el = document.getElementById('mesesForm');
+  el.innerHTML = '';
+  for(let i=MES_INICIO;i<12;i++){
+    const btn = document.createElement('button');
+    btn.className = 'm-btn'+(mesesSel.includes(i)?' on':'');
+    btn.textContent = MESES[i];
+    btn.onclick = ()=>{ if(mesesSel.includes(i)) mesesSel.splice(mesesSel.indexOf(i),1); else mesesSel.push(i); buildMeses(); };
+    el.appendChild(btn);
+  }
+}
+
+function setEstrella(n) {
+  conductaSel = n;
+  document.querySelectorAll('#estrellasForm .estrella').forEach((e,i)=>{
+    e.classList.toggle('on', i < n);
+  });
+}
+
+function renderEstrellas(n) {
+  document.querySelectorAll('#estrellasForm .estrella').forEach((e,i)=>{
+    e.classList.toggle('on', i < n);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// FORM ABRIR / GUARDAR / ELIMINAR
+// ══════════════════════════════════════════════════════════
+function abrirFormNuevo() {
+  editandoId = null; mesesSel = []; conductaSel = 0;
+  document.getElementById('formTitulo').textContent = 'Nuevo Jugador';
+  document.getElementById('btnEliminar').style.display = 'none';
+  ['f-nombre','f-fecha','f-cel','f-rep','f-edad','f-mejorar','f-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-cat').value='';
+  document.getElementById('f-posicion').value='';
+  document.getElementById('f-uniforme').value='pendiente';
+  buildMeses(); renderEstrellas(0);
+  document.getElementById('overlayAlumno').classList.add('open');
+}
+
+function abrirEditar(id) {
+  const j = cargarDatos().find(x=>x.id===id);
+  if(!j) return;
+  editandoId = id;
+  mesesSel = [...(j.meses||[])];
+  conductaSel = j.conducta||0;
+  document.getElementById('formTitulo').textContent = 'Editar Jugador';
+  document.getElementById('btnEliminar').style.display = 'block';
+  document.getElementById('f-nombre').value   = j.nombre;
+  document.getElementById('f-fecha').value    = j.fecha||'';
+  document.getElementById('f-edad').value     = j.edad||'';
+  document.getElementById('f-cat').value      = j.cat;
+  document.getElementById('f-posicion').value = j.posicion||'';
+  document.getElementById('f-rep').value      = j.rep||'';
+  document.getElementById('f-cel').value      = j.cel||'';
+  document.getElementById('f-uniforme').value = j.uniforme||'pendiente';
+  document.getElementById('f-mejorar').value  = j.mejorar||'';
+  document.getElementById('f-notas').value    = j.notas||'';
+  buildMeses(); renderEstrellas(conductaSel);
+  document.getElementById('overlayAlumno').classList.add('open');
+}
+
+function guardarAlumno() {
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const cat    = document.getElementById('f-cat').value;
+  if(!nombre||!cat){ toast('⚠️ Nombre y categoría son obligatorios'); return; }
+  const datos = {
+    nombre, cat,
+    fecha:    document.getElementById('f-fecha').value,
+    edad:     document.getElementById('f-edad').value,
+    posicion: document.getElementById('f-posicion').value,
+    rep:      document.getElementById('f-rep').value.trim(),
+    cel:      document.getElementById('f-cel').value.trim(),
+    uniforme: document.getElementById('f-uniforme').value,
+    meses:    [...mesesSel],
+    conducta: conductaSel,
+    mejorar:  document.getElementById('f-mejorar').value.trim(),
+    notas:    document.getElementById('f-notas').value.trim(),
+  };
+  let alumnos = cargarDatos();
+  if(editandoId) {
+    alumnos = alumnos.map(j=>j.id===editandoId?{...j,...datos}:j);
+  } else {
+    alumnos.push({id:Date.now(),...datos});
+  }
+  guardarDatos(alumnos);
+  cerrarDrawer('overlayAlumno');
+  renderAlumnos();
+  toast(editandoId?'✅ Jugador actualizado':'✅ Jugador guardado');
+}
+
+function eliminarAlumno() {
+  if(!confirm('¿Eliminar este jugador?')) return;
+  guardarDatos(cargarDatos().filter(j=>j.id!==editandoId));
+  cerrarDrawer('overlayAlumno');
+  renderAlumnos();
+  toast('🗑 Jugador eliminado');
+}
+
+// ══════════════════════════════════════════════════════════
+// PAGOS
+// ══════════════════════════════════════════════════════════
+function renderPagos() {
+  const alumnos = cargarDatos();
+  const el = document.getElementById('pagosContent');
+  if(!alumnos.length){ el.innerHTML='<div class="empty-state"><div class="ei">💰</div><p>No hay alumnos registrados</p></div>'; return; }
+  const pagaron = alumnos.filter(j=>(j.meses||[]).includes(MES_ACTUAL));
+  const deben   = alumnos.filter(j=>!(j.meses||[]).includes(MES_ACTUAL));
+  const uEnt    = alumnos.filter(j=>j.uniforme==='entregado');
+  const uPag    = alumnos.filter(j=>j.uniforme==='pagado');
+  const uPend   = alumnos.filter(j=>!j.uniforme||j.uniforme==='pendiente');
+  const fila = (j,badge)=>`<div class="pago-item">
+    <div><div class="pago-nombre">${j.nombre}</div><div class="pago-cat">${j.cat}</div></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      ${j.cel?`<a href="tel:${j.cel}" style="font-size:16px;text-decoration:none">📞</a>`:''}
+      ${badge}
+    </div></div>`;
+  el.innerHTML = `
+    <div class="pagos-card">
+      <div class="pagos-head verde">✅ Pagaron ${MESES[MES_ACTUAL]} <span>${pagaron.length}</span></div>
+      ${pagaron.map(j=>fila(j,'<span class="badge-mini badge-green">Pagó</span>')).join('')||'<div class="pago-item" style="color:var(--muted)">Ninguno aún</div>'}
+    </div>
+    <div class="pagos-card">
+      <div class="pagos-head rojo">⚠️ Pendiente ${MESES[MES_ACTUAL]} <span>${deben.length}</span></div>
+      ${deben.map(j=>fila(j,'<span class="badge-mini badge-red">Debe</span>')).join('')||'<div class="pago-item" style="color:var(--green);font-weight:700">¡Todos al día! 🎉</div>'}
+    </div>
+    <div class="pagos-card">
+      <div class="pagos-head morado">👕 Uniformes (desde Julio)</div>
+      ${uEnt.map(j=>fila(j,'<span class="badge-mini badge-green">🎽 Entregado</span>')).join('')}
+      ${uPag.map(j=>fila(j,'<span class="badge-mini badge-blue">✅ Pagado</span>')).join('')}
+      ${uPend.map(j=>fila(j,'<span class="badge-mini badge-orange">⏳ Pendiente</span>')).join('')}
+      ${!alumnos.length?'<div class="pago-item" style="color:var(--muted)">Sin datos</div>':''}
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// FICHAS DEPORTIVAS
+// ══════════════════════════════════════════════════════════
+function renderFichaSelector() {
+  const buscar = (document.getElementById('buscarFicha').value||'').toLowerCase();
+  const lista  = cargarDatos().filter(j=>j.nombre.toLowerCase().includes(buscar));
+  document.getElementById('fichaVista').innerHTML = '';
+  const el = document.getElementById('fichaSelector');
+  if(!lista.length){ el.innerHTML='<div class="empty-state"><div class="ei">📋</div><p>No hay alumnos</p></div>'; return; }
+  el.innerHTML = lista.map(j=>`
+    <div class="j-card" onclick="generarFicha(${j.id})" style="margin-bottom:8px">
+      <div class="j-card-head">
+        <div class="j-avatar">${iniciales(j.nombre)}</div>
+        <div class="j-info"><div class="j-nombre">${j.nombre}</div><div class="j-meta">${j.cat} · ${j.posicion||'—'}</div></div>
+        <span style="font-size:12px;color:var(--muted)">Generar ›</span>
+      </div>
+    </div>`).join('');
+}
+
+function generarFicha(id) {
+  const j = cargarDatos().find(x=>x.id===id);
+  if(!j) return;
+  document.getElementById('fichaSelector').innerHTML='';
+  document.getElementById('buscarFicha').value='';
+  const hoy = new Date();
+  const fechaHoy = `${hoy.getDate()}/${hoy.getMonth()+1}/${hoy.getFullYear()}`;
+  const pagados    = (j.meses||[]).filter(m=>m>=MES_INICIO);
+  const pendientes = [];
+  for(let i=MES_INICIO;i<=MES_ACTUAL;i++) if(!pagados.includes(i)) pendientes.push(i);
+  const totalMeses = MES_ACTUAL - MES_INICIO + 1;
+  const uLabel = j.uniforme==='entregado'?'🎽 Entregado':j.uniforme==='pagado'?'✅ Pagado':'⏳ Pendiente';
+  const uColor = j.uniforme==='entregado'?'var(--green)':j.uniforme==='pagado'?'var(--blue)':'var(--orange)';
+  const estrellasHTML = j.conducta ? '⭐'.repeat(j.conducta)+'☆'.repeat(5-j.conducta) : '☆☆☆☆☆';
+  const conductaTexto = ['','Necesita mucho trabajo','Puede mejorar','Regular','Buena conducta','Excelente conducta'][j.conducta||0] || '—';
+
+  document.getElementById('fichaVista').innerHTML = `
+    <div class="sec-title">Ficha · ${fechaHoy}</div>
+    <div class="ficha-card">
+      <div class="ficha-header">
+        <div class="ficha-avatar">${iniciales(j.nombre)}</div>
+        <div>
+          <div class="ficha-nombre">${j.nombre}</div>
+          <div class="ficha-cat">${j.cat}${j.posicion?' · '+j.posicion:''}</div>
+          <div class="ficha-club">TENA JUNIORS · ESCUELA DE FÚTBOL</div>
+        </div>
+      </div>
+      <div class="ficha-body">
+        <div class="info-grid">
+          <div><div class="info-cell-label">Edad</div><div class="info-cell-val">${j.edad?j.edad+' años':'—'}</div></div>
+          <div><div class="info-cell-label">Nacimiento</div><div class="info-cell-val">${j.fecha?formatFecha(j.fecha):'—'}</div></div>
+          <div><div class="info-cell-label">Representante</div><div class="info-cell-val">${j.rep||'—'}</div></div>
+          <div><div class="info-cell-label">Celular</div><div class="info-cell-val">${j.cel||'—'}</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="info-cell-label" style="margin-bottom:6px">CONDUCTA</div>
+        <div style="font-size:22px;letter-spacing:2px;margin-bottom:4px">${estrellasHTML}</div>
+        <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px">${conductaTexto}</div>
+        ${j.mejorar?`<div class="info-cell-label" style="margin-bottom:4px">ASPECTOS A MEJORAR</div>
+        <div style="font-size:13px;color:var(--text);background:var(--off);border-radius:8px;padding:10px;margin-bottom:8px;line-height:1.5">${j.mejorar}</div>`:''}
+        ${j.notas?`<div class="info-cell-label" style="margin-bottom:4px">NOTAS DEL ENTRENADOR</div>
+        <div style="font-size:13px;color:var(--text);background:var(--off);border-radius:8px;padding:10px;margin-bottom:8px;line-height:1.5">${j.notas}</div>`:''}
+        <div class="divider"></div>
+        <div class="info-cell-label" style="margin-bottom:6px">PAGOS ${AÑO}</div>
+        <div class="meses-estado">
+          ${pagados.map(m=>`<span class="mes-tag pagado">✓ ${MESES[m]}</span>`).join('')}
+          ${pendientes.map(m=>`<span class="mes-tag pendiente">✗ ${MESES[m]}</span>`).join('')}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">
+          Pagos: <strong style="color:var(--green)">${pagados.length}/${totalMeses}</strong>
+          ${pendientes.length?'· Debe: <strong style="color:var(--red)">'+pendientes.map(m=>MESES[m]).join(', ')+'</strong>':'· <strong style="color:var(--green)">¡Al día! 🎉</strong>'}
+        </div>
+        <div class="divider"></div>
+        <div class="info-cell-label" style="margin-bottom:4px">UNIFORME</div>
+        <div style="font-size:14px;font-weight:700;color:${uColor}">${uLabel}</div>
+      </div>
+      <div class="ficha-footer">Generado ${fechaHoy} · Tena Juniors · Tena, Ecuador</div>
+    </div>
+    <button class="btn-secondary" onclick="renderFichaSelector()">← Seleccionar otro alumno</button>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// NOTAS DE VENTA
+// ══════════════════════════════════════════════════════════
+function initVentas() {
+  const sel = document.getElementById('ventaAlumno');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Seleccionar alumno…</option>';
+  cargarDatos().forEach(j=>{
+    const o = document.createElement('option');
+    o.value = j.id; o.textContent = j.nombre+' · '+j.cat;
+    sel.appendChild(o);
+  });
+  if(prev) sel.value = prev;
+
+  conceptosBase = [
+    {id:'mens',   label:'Mensualidad '+MESES[MES_ACTUAL], monto:0, activo:false},
+    {id:'unif',   label:'Uniforme (depósito)',             monto:0, activo:false},
+    {id:'inscr',  label:'Inscripción',                     monto:0, activo:false},
+    {id:'equip',  label:'Equipamiento',                    monto:0, activo:false},
+  ];
+  renderConceptos();
+  document.getElementById('notaVentaVista').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Selecciona un alumno y marca los conceptos con su valor</div>';
+}
+
+function renderConceptos() {
+  document.getElementById('conceptosLista').innerHTML = conceptosBase.map((c,i)=>`
+    <div class="concepto-item">
+      <input type="checkbox" id="chk${i}" ${c.activo?'checked':''} onchange="conceptosBase[${i}].activo=this.checked;actualizarNota()">
+      <label for="chk${i}" class="concepto-label">${c.label}</label>
+      <input type="number" class="precio-input" value="${c.monto||''}" placeholder="$0"
+        oninput="conceptosBase[${i}].monto=parseFloat(this.value)||0;actualizarNota()">
+    </div>`).join('');
+}
+
+function agregarConceptoExtra() {
+  const label = document.getElementById('conceptoExtra').value.trim();
+  const monto = parseFloat(document.getElementById('conceptoMonto').value)||0;
+  if(!label){ toast('⚠️ Escribe el nombre del concepto'); return; }
+  conceptosBase.push({id:'x'+Date.now(), label, monto, activo:true});
+  document.getElementById('conceptoExtra').value='';
+  document.getElementById('conceptoMonto').value='';
+  renderConceptos();
+  actualizarNota();
+}
+
+function actualizarNota() {
+  const alId = document.getElementById('ventaAlumno').value;
+  const al   = cargarDatos().find(j=>j.id==alId);
+  const activos = conceptosBase.filter(c=>c.activo);
+  const total   = activos.reduce((s,c)=>s+(c.monto||0),0);
+  const hoy = new Date();
+  const fechaStr = `${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`;
+  const el = document.getElementById('notaVentaVista');
+
+  if(!al){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px">Selecciona un alumno</div>';
+    return;
+  }
+  if(!activos.length || total===0){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px">Marca al menos un concepto con valor para generar la nota</div>';
+    return;
+  }
+
+  const numNota = String(notaCounter).padStart(4,'0');
+  el.innerHTML = `
+    <div class="sec-title">Vista previa · Nota N° ${numNota}</div>
+    <div class="nota-card">
+      <div class="nota-header">
+        <div>
+          <div class="nota-num">NOTA DE VENTA #${numNota}</div>
+          <div class="nota-fecha">Tena Juniors · ${fechaStr}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:rgba(255,255,255,.5)">Alumno</div>
+          <div style="font-size:14px;color:white;font-weight:700">${al.nombre}</div>
+          <div style="font-size:11px;color:var(--gold)">${al.cat}</div>
+        </div>
+      </div>
+      <div class="nota-body">
+        <div style="display:flex;justify-content:space-between;padding-bottom:8px;margin-bottom:4px;border-bottom:2px solid var(--border)">
+          <span style="font-size:11px;font-weight:700;color:var(--muted)">CONCEPTO</span>
+          <span style="font-size:11px;font-weight:700;color:var(--muted)">VALOR</span>
+        </div>
+        ${activos.map(c=>`<div class="nota-row"><span class="nota-label">${c.label}</span><span class="nota-val">$${(c.monto||0).toFixed(2)}</span></div>`).join('')}
+        <div class="nota-total">
+          <span class="nota-total-label">TOTAL A PAGAR</span>
+          <span class="nota-total-val">$${total.toFixed(2)}</span>
+        </div>
+        ${al.rep?`<div style="font-size:11px;color:var(--muted);margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)">
+          Representante: <strong>${al.rep}</strong>${al.cel?' · 📞 '+al.cel:''}
+        </div>`:''}
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center">
+          Tena Juniors · Escuela de Fútbol · Tena, Ecuador
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="confirmarNota()">✅ CONFIRMAR — Tomar captura ahora</button>`;
+}
+
+function confirmarNota() {
+  toast('🧾 Nota #'+String(notaCounter).padStart(4,'0')+' generada — toma captura de pantalla');
+  notaCounter++;
+  saveNotaCounter(notaCounter);
+  document.getElementById('ventaAlumno').value='';
+  conceptosBase=[];
+  renderConceptos();
+  document.getElementById('notaVentaVista').innerHTML='';
+}
+
+// ══════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════
+function renderStats() {
+  const a = cargarDatos();
+  const pagaron = a.filter(j=>(j.meses||[]).includes(MES_ACTUAL)).length;
+  const uListo  = a.filter(j=>j.uniforme==='entregado').length;
+  document.getElementById('st-total').textContent   = a.length;
+  document.getElementById('st-pagaron').textContent = pagaron;
+  document.getElementById('st-deben').textContent   = a.length - pagaron;
+  document.getElementById('st-uniforme').textContent= uListo;
+  const counts = {};
+  a.forEach(j=>counts[j.cat]=(counts[j.cat]||0)+1);
+  const max = Math.max(...Object.values(counts),1);
+  document.getElementById('catBars').innerHTML = CATS.filter(c=>counts[c]).map(c=>`
+    <div class="bar-row">
+      <div class="bar-label">${c}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(counts[c]/max)*100}%"></div></div>
+      <div class="bar-count">${counts[c]}</div>
+    </div>`).join('')||'<p style="color:var(--muted);font-size:13px">Sin datos</p>';
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORTAR RESPALDO
+// ══════════════════════════════════════════════════════════
+function exportarRespaldo() {
+  const data = cargarDatos();
+  if(!data.length){ toast('⚠️ No hay datos para exportar'); return; }
+  const json = JSON.stringify({alumnos:data, exportado: new Date().toISOString(), nota_counter: notaCounter}, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'tena-juniors-respaldo-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('💾 Respaldo descargado exitosamente');
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function formatFecha(f){ if(!f) return '—'; const [y,m,d]=f.split('-'); return `${d}/${m}/${y}`; }
+function cerrarOverlay(id,e){ if(e&&e.target!==document.getElementById(id)) return; cerrarDrawer(id); }
+function cerrarDrawer(id){ document.getElementById(id).classList.remove('open'); }
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// INIT
+updatePortada();
+</script>
+</body>
+</html>
