@@ -595,7 +595,7 @@ function renderAlumnos() {
     const estrellas = j.conducta ? '⭐'.repeat(j.conducta) : '';
     const uBadge = j.uniforme==='entregado'?'<span class="badge-mini badge-green">🎽 Uniforme</span>'
                  : j.uniforme==='pagado'   ?'<span class="badge-mini badge-blue">✅ Unif.</span>':'';
-    return `<div class="j-card" onclick="abrirEditar(${j.id})">
+    return `<div class="j-card" onclick="abrirEditar('${j.id}')">
       <div class="j-card-head">
         <div class="j-avatar">${iniciales(j.nombre)}</div>
         <div class="j-info">
@@ -657,9 +657,9 @@ function abrirFormNuevo() {
 }
 
 function abrirEditar(id) {
-  const j = cargarDatos().find(x=>x.id===id);
+  const j = cargarDatos().find(x=>String(x.id)===String(id));
   if(!j) return;
-  editandoId = id;
+  editandoId = String(id);
   mesesSel = [...(j.meses||[])];
   conductaSel = j.conducta||0;
   document.getElementById('formTitulo').textContent = 'Editar Jugador';
@@ -757,7 +757,7 @@ function renderFichaSelector() {
   const el = document.getElementById('fichaSelector');
   if(!lista.length){ el.innerHTML='<div class="empty-state"><div class="ei">📋</div><p>No hay alumnos</p></div>'; return; }
   el.innerHTML = lista.map(j=>`
-    <div class="j-card" onclick="generarFicha(${j.id})" style="margin-bottom:8px">
+    <div class="j-card" onclick="generarFicha('${j.id}')" style="margin-bottom:8px">
       <div class="j-card-head">
         <div class="j-avatar">${iniciales(j.nombre)}</div>
         <div class="j-info"><div class="j-nombre">${j.nombre}</div><div class="j-meta">${j.cat} · ${j.posicion||'—'}</div></div>
@@ -767,7 +767,8 @@ function renderFichaSelector() {
 }
 
 function generarFicha(id) {
-  const j = cargarDatos().find(x=>x.id===id);
+  const sid = String(id);
+  const j = cargarDatos().find(x=>String(x.id)===sid);
   if(!j) return;
   document.getElementById('fichaSelector').innerHTML='';
   document.getElementById('buscarFicha').value='';
@@ -874,7 +875,7 @@ function agregarConceptoExtra() {
 
 function actualizarNota() {
   const alId = document.getElementById('ventaAlumno').value;
-  const al   = cargarDatos().find(j=>j.id==alId);
+  const al   = cargarDatos().find(j=>String(j.id)===String(alId));
   const activos = conceptosBase.filter(c=>c.activo);
   const total   = activos.reduce((s,c)=>s+(c.monto||0),0);
   const hoy = new Date();
