@@ -506,25 +506,23 @@ updatePortada();
 </script>
 
 <script>
-// Fallback si Firebase aún no cargó
-if(typeof cargarDatos==='undefined') window.cargarDatos=()=>{try{return JSON.parse(localStorage.getItem('tj_fb_cache'))||[];}catch(e){return[];}};
-if(typeof notaCounter==='undefined') window.notaCounter=1;
-
 // ══════════════════════════════════════════════════════════
-// CONSTANTES
+// VARIABLES GLOBALES — primero para evitar ReferenceError
 // ══════════════════════════════════════════════════════════
-const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const MES_INICIO = 5;
-const MES_ACTUAL = new Date().getMonth();
-const AÑO = new Date().getFullYear();
-const CATS = ['Sub-8','Sub-10','Sub-12','Sub-14','Sub-16','Primera'];
-
-let catFiltro = '';
-let editandoId = null;
-let mesesSel = [];
-let conductaSel = 0;
-let conceptosBase = [];
-let notaCounter = 1; // se carga async desde Firebase
+window.MESES        = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+window.MES_INICIO   = 5;
+window.MES_ACTUAL   = new Date().getMonth();
+window.AÑO          = new Date().getFullYear();
+window.CATS         = ['Sub-8','Sub-10','Sub-12','Sub-14','Sub-16','Primera'];
+window.catFiltro    = '';
+window.editandoId   = null;
+window.mesesSel     = [];
+window.conductaSel  = 0;
+window.conceptosBase= [];
+window.notaCounter  = 1;
+if(typeof window.cargarDatos==='undefined'){
+  window.cargarDatos = ()=>{try{return JSON.parse(localStorage.getItem('tj_fb_cache'))||[];}catch(e){return[];}};
+}
 
 // ══════════════════════════════════════════════════════════
 // PORTADA
