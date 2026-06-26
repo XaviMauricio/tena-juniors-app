@@ -428,55 +428,87 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
 
 <div class="toast" id="toast"></div>
 
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDAGeffoFShll867udN9L4PcmUTL_hibzY",
+  authDomain: "tena-juniors-app.firebaseapp.com",
+  projectId: "tena-juniors-app",
+  storageBucket: "tena-juniors-app.firebasestorage.app",
+  messagingSenderId: "727161231817",
+  appId: "1:727161231817:web:edff98ea98a05568fd7018"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const COLL = collection(db, 'alumnos');
+const META = doc(db, 'meta', 'config');
+
+let _cache = [];
+function _sl(arr){ try{ localStorage.setItem('tj_fb_cache', JSON.stringify(arr)); }catch(e){} }
+function _gl(){ try{ return JSON.parse(localStorage.getItem('tj_fb_cache'))||[]; }catch(e){ return []; } }
+
+// Escuchar cambios en tiempo real
+onSnapshot(COLL, snap => {
+  _cache = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+  _sl(_cache);
+  updatePortada();
+  if(document.getElementById('panel-alumnos').classList.contains('active')) renderAlumnos();
+  if(document.getElementById('panel-pagos').classList.contains('active'))   renderPagos();
+  if(document.getElementById('panel-stats').classList.contains('active'))   renderStats();
+}, err => {
+  console.warn('Offline:', err.message);
+  _cache = _gl();
+});
+
+window.cargarDatos = () => _cache.length ? _cache : _gl();
+
+window._guardarAlumnoFB = async (datos, id) => {
+  try {
+    const ref = id ? doc(db,'alumnos',id) : doc(COLL);
+    await setDoc(ref, {...datos, id: ref.id}, {merge:true});
+    return ref.id;
+  } catch(e) {
+    toast('📵 Sin internet — guardado local');
+    const nid = id || String(Date.now());
+    _cache = id ? _cache.map(j=>j.id===id?{...j,...datos,id}:j) : [..._cache,{...datos,id:nid}];
+    _sl(_cache);
+    return nid;
+  }
+};
+
+window._eliminarAlumnoFB = async (id) => {
+  try { await deleteDoc(doc(db,'alumnos',id)); }
+  catch(e) { _cache=_cache.filter(j=>j.id!==id); _sl(_cache); }
+};
+
+window.getNotaCounter = async () => {
+  try { const s=await getDoc(META); return s.exists()?(s.data().notaCounter||1):1; }
+  catch(e) { return parseInt(localStorage.getItem('tj_nota_v2'))||1; }
+};
+window.saveNotaCounter = async (n) => {
+  try { await setDoc(META,{notaCounter:n},{merge:true}); } catch(e){}
+  try { localStorage.setItem('tj_nota_v2',n); } catch(e){}
+};
+
+// Indicador de conexión
+window.addEventListener('online',  ()=>toast('🟢 Conectado — datos en la nube'));
+window.addEventListener('offline', ()=>toast('📵 Sin internet — modo offline'));
+
+// Cargar contador de notas
+getNotaCounter().then(n => { window.notaCounter = n; });
+
+updatePortada();
+</script>
+
 <script>
-// ══════════════════════════════════════════════════════════
-// STORAGE — guarda en localStorage Y en cookie como doble respaldo
-// ══════════════════════════════════════════════════════════
-const KEY = 'tj_alumnos_v2';
-const KEY_NOTA = 'tj_nota_v2';
-
-function guardarDatos(arr) {
-  const json = JSON.stringify(arr);
-  // 1. localStorage
-  try { localStorage.setItem(KEY, json); } catch(e){}
-  // 2. sessionStorage como copia
-  try { sessionStorage.setItem(KEY, json); } catch(e){}
-  // 3. Cookie (hasta 1 año, 4KB máx — suficiente para muchos alumnos)
-  try {
-    const expire = new Date();
-    expire.setFullYear(expire.getFullYear() + 1);
-    document.cookie = KEY + '=' + encodeURIComponent(json) + ';expires=' + expire.toUTCString() + ';path=/;SameSite=Lax';
-  } catch(e){}
-}
-
-function cargarDatos() {
-  // Intenta las 3 fuentes en orden
-  let data = null;
-  try { data = JSON.parse(localStorage.getItem(KEY)); } catch(e){}
-  if (!data || !data.length) {
-    try { data = JSON.parse(sessionStorage.getItem(KEY)); } catch(e){}
-  }
-  if (!data || !data.length) {
-    try {
-      const match = document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)'));
-      if (match) data = JSON.parse(decodeURIComponent(match[1]));
-    } catch(e){}
-  }
-  return Array.isArray(data) ? data : [];
-}
-
-function getNotaCounter() {
-  let n = 1;
-  try { n = parseInt(localStorage.getItem(KEY_NOTA)) || 1; } catch(e){}
-  return n;
-}
-function saveNotaCounter(n) {
-  try { localStorage.setItem(KEY_NOTA, n); } catch(e){}
-  try {
-    const exp = new Date(); exp.setFullYear(exp.getFullYear()+1);
-    document.cookie = KEY_NOTA+'='+n+';expires='+exp.toUTCString()+';path=/;SameSite=Lax';
-  } catch(e){}
-}
+// Fallback si Firebase aún no cargó
+if(typeof cargarDatos==='undefined') window.cargarDatos=()=>{try{return JSON.parse(localStorage.getItem('tj_fb_cache'))||[];}catch(e){return[];}};
+if(typeof notaCounter==='undefined') window.notaCounter=1;
 
 // ══════════════════════════════════════════════════════════
 // CONSTANTES
@@ -492,7 +524,7 @@ let editandoId = null;
 let mesesSel = [];
 let conductaSel = 0;
 let conceptosBase = [];
-let notaCounter = getNotaCounter();
+let notaCounter = 1; // se carga async desde Firebase
 
 // ══════════════════════════════════════════════════════════
 // PORTADA
@@ -648,7 +680,7 @@ function abrirEditar(id) {
   document.getElementById('overlayAlumno').classList.add('open');
 }
 
-function guardarAlumno() {
+async function guardarAlumno() {
   const nombre = document.getElementById('f-nombre').value.trim();
   const cat    = document.getElementById('f-cat').value;
   if(!nombre||!cat){ toast('⚠️ Nombre y categoría son obligatorios'); return; }
@@ -664,23 +696,19 @@ function guardarAlumno() {
     conducta: conductaSel,
     mejorar:  document.getElementById('f-mejorar').value.trim(),
     notas:    document.getElementById('f-notas').value.trim(),
+    updatedAt: new Date().toISOString(),
   };
-  let alumnos = cargarDatos();
-  if(editandoId) {
-    alumnos = alumnos.map(j=>j.id===editandoId?{...j,...datos}:j);
-  } else {
-    alumnos.push({id:Date.now(),...datos});
-  }
-  guardarDatos(alumnos);
   cerrarDrawer('overlayAlumno');
+  toast('⏳ Guardando…');
+  await window._guardarAlumnoFB(datos, editandoId ? String(editandoId) : null);
   renderAlumnos();
   toast(editandoId?'✅ Jugador actualizado':'✅ Jugador guardado');
 }
 
-function eliminarAlumno() {
+async function eliminarAlumno() {
   if(!confirm('¿Eliminar este jugador?')) return;
-  guardarDatos(cargarDatos().filter(j=>j.id!==editandoId));
   cerrarDrawer('overlayAlumno');
+  await window._eliminarAlumnoFB(String(editandoId));
   renderAlumnos();
   toast('🗑 Jugador eliminado');
 }
@@ -900,10 +928,10 @@ function actualizarNota() {
     <button class="btn-primary" onclick="confirmarNota()">✅ CONFIRMAR — Tomar captura ahora</button>`;
 }
 
-function confirmarNota() {
+async function confirmarNota() {
   toast('🧾 Nota #'+String(notaCounter).padStart(4,'0')+' generada — toma captura de pantalla');
   notaCounter++;
-  saveNotaCounter(notaCounter);
+  await window.saveNotaCounter(notaCounter);
   document.getElementById('ventaAlumno').value='';
   conceptosBase=[];
   renderConceptos();
@@ -946,7 +974,7 @@ function exportarRespaldo() {
   a.download = 'tena-juniors-respaldo-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
   URL.revokeObjectURL(url);
-  toast('💾 Respaldo descargado exitosamente');
+  toast('💾 Respaldo JSON descargado');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -961,8 +989,9 @@ function toast(msg){
   setTimeout(()=>el.classList.remove('show'),2800);
 }
 
-// INIT
-updatePortada();
+// INIT — Firebase carga los datos y llama updatePortada() automáticamente
+// No necesitamos llamarla aquí, el onSnapshot lo hace
+
 </script>
 </body>
 </html>
