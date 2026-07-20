@@ -222,6 +222,27 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
 /* BACKUP BANNER */
 .backup-bar{background:#1a3a8f;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;flex-shrink:0;}
 .backup-bar button{background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;}
+
+/* SUCURSALES */
+.suc-header{border-radius:14px;padding:14px 16px;margin-bottom:12px;color:white;display:flex;align-items:center;gap:12px;}
+.suc-header.s1{background:linear-gradient(135deg,#1A3A8F,#2451C7);}
+.suc-header.s2{background:linear-gradient(135deg,#1B5E3B,#2E7D52);}
+.suc-icon{font-size:28px;width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.suc-titulo{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;}
+.suc-sub{font-size:11px;opacity:.7;margin-top:2px;}
+.suc-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.suc-badge{background:rgba(255,255,255,.15);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;}
+.suc-table{background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:20px;}
+.suc-table-head{display:grid;grid-template-columns:1fr 60px 80px;background:var(--off);padding:8px 14px;border-bottom:1.5px solid var(--border);}
+.suc-th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.suc-row{display:grid;grid-template-columns:1fr 60px 80px;padding:10px 14px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;cursor:pointer;}
+.suc-row:last-child{border-bottom:none;}
+.suc-row:active{background:var(--off);}
+.suc-nombre{font-weight:600;font-size:13px;}
+.suc-edad{font-size:12px;color:var(--muted);text-align:center;}
+.suc-pago{text-align:right;}
+.num-rank{font-family:'Oswald',sans-serif;font-size:11px;color:var(--muted);margin-right:6px;}
+
 </style>
 </head>
 <body>
@@ -265,6 +286,7 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
   <button class="tab-btn" onclick="switchTab('pagos')" id="tab-pagos"><span class="icon">💰</span>Pagos</button>
   <button class="tab-btn" onclick="switchTab('fichas')" id="tab-fichas"><span class="icon">📋</span>Fichas</button>
   <button class="tab-btn" onclick="switchTab('ventas')" id="tab-ventas"><span class="icon">🧾</span>Ventas</button>
+  <button class="tab-btn" onclick="switchTab('sucursales')" id="tab-sucursales"><span class="icon">🏟</span>Sucursales</button>
   <button class="tab-btn" onclick="switchTab('stats')" id="tab-stats"><span class="icon">📊</span>Resumen</button>
 </div>
 
@@ -323,6 +345,11 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
     <div id="notaVentaVista"></div>
   </div>
 
+  <!-- SUCURSALES -->
+  <div class="panel" id="panel-sucursales">
+    <div id="sucursalesContent"></div>
+  </div>
+
   <!-- STATS -->
   <div class="panel" id="panel-stats">
     <div class="stats-row">
@@ -363,6 +390,14 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
           <label class="f-label">Edad</label>
           <input class="f-input" type="number" id="f-edad" placeholder="9" min="4" max="22">
         </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Sucursal *</label>
+        <select class="f-select" id="f-sucursal">
+          <option value="">Seleccionar sucursal…</option>
+          <option value="s1">📍 Escuela Nacional Tena</option>
+          <option value="s2">📍 21 de Enero</option>
+        </select>
       </div>
       <div class="f-group">
         <label class="f-label">Categoría *</label>
@@ -561,11 +596,12 @@ function switchTab(name) {
   document.getElementById('panel-'+name).classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
   document.getElementById('fabBtn').style.display = name==='alumnos' ? 'flex' : 'none';
-  if(name==='alumnos') renderAlumnos();
-  if(name==='pagos')   renderPagos();
-  if(name==='fichas')  renderFichaSelector();
-  if(name==='ventas')  initVentas();
-  if(name==='stats')   renderStats();
+  if(name==='alumnos')    renderAlumnos();
+  if(name==='pagos')      renderPagos();
+  if(name==='fichas')     renderFichaSelector();
+  if(name==='ventas')     initVentas();
+  if(name==='sucursales') renderSucursales();
+  if(name==='stats')      renderStats();
 }
 
 function selectCat(el) {
@@ -601,6 +637,7 @@ function renderAlumnos() {
         <div class="j-info">
           <div class="j-nombre">${j.nombre}</div>
           <div class="j-meta">${j.posicion||'Sin posición'} · ${j.edad?j.edad+' años':'—'} ${estrellas?'· '+estrellas:''}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px">${j.sucursal==='s1'?'📍 Esc. Nacional Tena':j.sucursal==='s2'?'📍 21 de Enero':'📍 Sin sucursal'}</div>
         </div>
         <div class="j-cat-badge">${j.cat}</div>
       </div>
@@ -650,6 +687,7 @@ function abrirFormNuevo() {
   document.getElementById('btnEliminar').style.display = 'none';
   ['f-nombre','f-fecha','f-cel','f-rep','f-edad','f-mejorar','f-notas'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-cat').value='';
+  document.getElementById('f-sucursal').value='';
   document.getElementById('f-posicion').value='';
   document.getElementById('f-uniforme').value='pendiente';
   buildMeses(); renderEstrellas(0);
@@ -668,6 +706,7 @@ function abrirEditar(id) {
   document.getElementById('f-fecha').value    = j.fecha||'';
   document.getElementById('f-edad').value     = j.edad||'';
   document.getElementById('f-cat').value      = j.cat;
+  document.getElementById('f-sucursal').value  = j.sucursal||'';
   document.getElementById('f-posicion').value = j.posicion||'';
   document.getElementById('f-rep').value      = j.rep||'';
   document.getElementById('f-cel').value      = j.cel||'';
@@ -684,6 +723,7 @@ async function guardarAlumno() {
   if(!nombre||!cat){ toast('⚠️ Nombre y categoría son obligatorios'); return; }
   const datos = {
     nombre, cat,
+    sucursal: document.getElementById('f-sucursal').value,
     fecha:    document.getElementById('f-fecha').value,
     edad:     document.getElementById('f-edad').value,
     posicion: document.getElementById('f-posicion').value,
@@ -986,6 +1026,105 @@ function toast(msg){
   const el=document.getElementById('toast');
   el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// SUCURSALES
+// ══════════════════════════════════════════════════════════
+function renderSucursales() {
+  const todos = cargarDatos();
+  const el = document.getElementById('sucursalesContent');
+  if(!todos.length){
+    el.innerHTML='<div class="empty-state"><div class="ei">🏟</div><p>No hay alumnos registrados</p></div>';
+    return;
+  }
+
+  const SUCURSALES = [
+    { id:'s1', nombre:'Escuela Nacional Tena',  clase:'s1', icon:'🏫' },
+    { id:'s2', nombre:'21 de Enero',             clase:'s2', icon:'🏟' },
+  ];
+
+  let out = '';
+  SUCURSALES.forEach(suc => {
+    // Filtrar alumnos de esta sucursal, ordenar por edad desc
+    const alumnos = todos
+      .filter(j => j.sucursal === suc.id)
+      .sort((a,b) => (parseInt(b.edad)||0) - (parseInt(a.edad)||0));
+
+    const total    = alumnos.length;
+    const pagaron  = alumnos.filter(j=>(j.meses||[]).includes(MES_ACTUAL)).length;
+    const deben    = total - pagaron;
+
+    out += `
+    <div class="suc-header ${suc.clase}">
+      <div class="suc-icon">${suc.icon}</div>
+      <div style="flex:1">
+        <div class="suc-titulo">SUCURSAL ${suc.id==='s1'?'1':'2'} · ${suc.nombre.toUpperCase()}</div>
+        <div class="suc-sub">Tena Juniors · Escuela de Fútbol</div>
+        <div class="suc-badges">
+          <span class="suc-badge">👥 ${total} alumnos</span>
+          <span class="suc-badge">✅ ${pagaron} pagaron</span>
+          ${deben>0?`<span class="suc-badge">⚠️ ${deben} deben</span>`:''}
+        </div>
+      </div>
+    </div>`;
+
+    if(!alumnos.length){
+      out += `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;margin-bottom:16px;background:white;border-radius:14px;border:1.5px solid var(--border)">Sin alumnos en esta sucursal</div>`;
+    } else {
+      out += `
+      <div class="suc-table">
+        <div class="suc-table-head">
+          <div class="suc-th"># Alumno</div>
+          <div class="suc-th" style="text-align:center">Edad</div>
+          <div class="suc-th" style="text-align:right">${MESES[MES_ACTUAL]}</div>
+        </div>`;
+
+      // Meses desde junio para mostrar en filas
+      const mesesDesdeJunio = [];
+      for(let i=MES_INICIO; i<=MES_ACTUAL; i++) mesesDesdeJunio.push(i);
+
+      alumnos.forEach((j, idx) => {
+        const pagMes = (j.meses||[]).includes(MES_ACTUAL);
+        const pagadosTotal = (j.meses||[]).filter(m=>m>=MES_INICIO).length;
+        const totalMeses   = mesesDesdeJunio.length;
+
+        out += `
+        <div class="suc-row" onclick="abrirEditar('${j.id}')">
+          <div>
+            <span class="num-rank">${idx+1}</span>
+            <span class="suc-nombre">${j.nombre}</span>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;padding-left:22px">${j.cat||''} ${j.posicion?'· '+j.posicion:''}</div>
+            <div style="font-size:10px;padding-left:22px;margin-top:2px">
+              ${mesesDesdeJunio.map(m=>`<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;margin:1px;${(j.meses||[]).includes(m)?'background:#E8F5EE;color:#1B8A4E':'background:#FDECEA;color:#C0392B'}">${MESES[m]}</span>`).join('')}
+            </div>
+          </div>
+          <div class="suc-edad">${j.edad?j.edad+'a':'—'}</div>
+          <div class="suc-pago">
+            ${pagMes
+              ? '<span class="badge-mini badge-green">✓ Pagó</span>'
+              : '<span class="badge-mini badge-red">✗ Debe</span>'}
+            <div style="font-size:9px;color:var(--muted);margin-top:3px;text-align:right">${pagadosTotal}/${totalMeses} meses</div>
+          </div>
+        </div>`;
+      });
+
+      out += `</div>`; // cierre suc-table
+    }
+  });
+
+  // Alumnos sin sucursal asignada
+  const sinSuc = todos.filter(j=>!j.sucursal);
+  if(sinSuc.length){
+    out += `
+    <div style="background:var(--orange-bg);border:1.5px solid #F5C800;border-radius:14px;padding:12px 16px;margin-top:4px">
+      <div style="font-weight:700;font-size:13px;color:var(--orange);margin-bottom:8px">⚠️ Sin sucursal asignada (${sinSuc.length})</div>
+      ${sinSuc.map(j=>`<div style="font-size:13px;padding:4px 0;border-bottom:1px dashed rgba(0,0,0,.1);cursor:pointer" onclick="abrirEditar('${j.id}')">${j.nombre} · ${j.cat||'—'}</div>`).join('')}
+    </div>`;
+  }
+
+  el.innerHTML = out;
 }
 
 // INIT — Firebase carga los datos y llama updatePortada() automáticamente
