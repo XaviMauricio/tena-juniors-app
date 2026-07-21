@@ -226,7 +226,7 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
 /* SUCURSALES */
 .suc-header{border-radius:14px;padding:14px 16px;margin-bottom:12px;color:white;display:flex;align-items:center;gap:12px;}
 .suc-header.s1{background:linear-gradient(135deg,#1A3A8F,#2451C7);}
-.suc-header.s2{background:linear-gradient(135deg,#1B5E3B,#2E7D52);}
+
 .suc-icon{font-size:28px;width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .suc-titulo{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;}
 .suc-sub{font-size:11px;opacity:.7;margin-top:2px;}
@@ -396,7 +396,6 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
         <select class="f-select" id="f-sucursal">
           <option value="">Seleccionar sucursal…</option>
           <option value="s1">📍 Escuela Nacional Tena</option>
-          <option value="s2">📍 21 de Enero</option>
         </select>
       </div>
       <div class="f-group">
@@ -637,7 +636,7 @@ function renderAlumnos() {
         <div class="j-info">
           <div class="j-nombre">${j.nombre}</div>
           <div class="j-meta">${j.posicion||'Sin posición'} · ${j.edad?j.edad+' años':'—'} ${estrellas?'· '+estrellas:''}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:1px">${j.sucursal==='s1'?'📍 Esc. Nacional Tena':j.sucursal==='s2'?'📍 21 de Enero':'📍 Sin sucursal'}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px">${j.sucursal==='s1'?'📍 Esc. Nacional Tena':'📍 Sin sucursal'}</div>
         </div>
         <div class="j-cat-badge">${j.cat}</div>
       </div>
@@ -1044,7 +1043,6 @@ function renderSucursales() {
 
   const SUCURSALES = [
     { id:'s1', nombre:'Escuela Nacional Tena', clase:'s1', icon:'🏫' },
-    { id:'s2', nombre:'21 de Enero',            clase:'s2', icon:'🏟' },
   ];
 
   // Meses desde junio hasta hoy
