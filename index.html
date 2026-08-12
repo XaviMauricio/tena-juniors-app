@@ -392,6 +392,18 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
         </div>
       </div>
       <div class="f-group">
+        <label class="f-label">Mes de ingreso</label>
+        <select class="f-select" id="f-ingreso">
+          <option value="5">Junio</option>
+          <option value="6">Julio</option>
+          <option value="7">Agosto</option>
+          <option value="8">Septiembre</option>
+          <option value="9">Octubre</option>
+          <option value="10">Noviembre</option>
+          <option value="11">Diciembre</option>
+        </select>
+      </div>
+      <div class="f-group">
         <label class="f-label">Sucursal *</label>
         <select class="f-select" id="f-sucursal">
           <option value="">Seleccionar sucursal…</option>
@@ -423,6 +435,13 @@ z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap
           <label class="f-label">Celular</label>
           <input class="f-input" type="tel" id="f-cel" placeholder="0999…">
         </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Estado</label>
+        <select class="f-select" id="f-estado">
+          <option value="activo">✅ Activo</option>
+          <option value="retirado">🚫 Retirado</option>
+        </select>
       </div>
       <div class="f-group">
         <label class="f-label">Uniforme</label>
@@ -630,7 +649,8 @@ function renderAlumnos() {
     const estrellas = j.conducta ? '⭐'.repeat(j.conducta) : '';
     const uBadge = j.uniforme==='entregado'?'<span class="badge-mini badge-green">🎽 Uniforme</span>'
                  : j.uniforme==='pagado'   ?'<span class="badge-mini badge-blue">✅ Unif.</span>':'';
-    return `<div class="j-card" onclick="abrirEditar('${j.id}')">
+    const retirado = j.estado==='retirado';
+    return `<div class="j-card" onclick="abrirEditar('${j.id}')" style="${retirado?'opacity:0.5;':''}">
       <div class="j-card-head">
         <div class="j-avatar">${iniciales(j.nombre)}</div>
         <div class="j-info">
@@ -641,7 +661,7 @@ function renderAlumnos() {
         <div class="j-cat-badge">${j.cat}</div>
       </div>
       <div class="j-card-footer">
-        ${pagMes?'<span class="badge-mini badge-green">✓ Pagó '+MESES[MES_ACTUAL]+'</span>':'<span class="badge-mini badge-red">✗ Debe '+MESES[MES_ACTUAL]+'</span>'}
+        ${retirado?'<span class="badge-mini badge-orange">🚫 Retirado</span>':(pagMes?'<span class="badge-mini badge-green">✓ Pagó '+MESES[MES_ACTUAL]+'</span>':'<span class="badge-mini badge-red">✗ Debe '+MESES[MES_ACTUAL]+'</span>')}
         ${uBadge}
         <span style="margin-left:auto;font-size:11px;color:var(--muted)">Editar ›</span>
       </div>
@@ -687,6 +707,8 @@ function abrirFormNuevo() {
   ['f-nombre','f-fecha','f-cel','f-rep','f-edad','f-mejorar','f-notas'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-cat').value='';
   document.getElementById('f-sucursal').value='';
+  document.getElementById('f-ingreso').value='5';
+  document.getElementById('f-estado').value='activo';
   document.getElementById('f-posicion').value='';
   document.getElementById('f-uniforme').value='pendiente';
   buildMeses(); renderEstrellas(0);
@@ -706,6 +728,8 @@ function abrirEditar(id) {
   document.getElementById('f-edad').value     = j.edad||'';
   document.getElementById('f-cat').value      = j.cat;
   document.getElementById('f-sucursal').value  = j.sucursal||'';
+  document.getElementById('f-ingreso').value   = j.ingreso!=null ? j.ingreso : 5;
+  document.getElementById('f-estado').value    = j.estado||'activo';
   document.getElementById('f-posicion').value = j.posicion||'';
   document.getElementById('f-rep').value      = j.rep||'';
   document.getElementById('f-cel').value      = j.cel||'';
@@ -722,7 +746,9 @@ async function guardarAlumno() {
   if(!nombre||!cat){ toast('⚠️ Nombre y categoría son obligatorios'); return; }
   const datos = {
     nombre, cat,
-    sucursal: document.getElementById('f-sucursal').value,
+    sucursal:  document.getElementById('f-sucursal').value,
+    ingreso:   parseInt(document.getElementById('f-ingreso').value),
+    estado:    document.getElementById('f-estado').value,
     fecha:    document.getElementById('f-fecha').value,
     edad:     document.getElementById('f-edad').value,
     posicion: document.getElementById('f-posicion').value,
@@ -1034,7 +1060,7 @@ function toast(msg){
 function renderSucursales() {
   const todos = cargarDatos();
   const el = document.getElementById('sucursalesContent');
-  const TARIFA = 15; // USD por alumno por mes
+  const TARIFA = 15;
 
   if(!todos.length){
     el.innerHTML='<div class="empty-state"><div class="ei">🏟</div><p>No hay alumnos registrados</p></div>';
@@ -1045,17 +1071,22 @@ function renderSucursales() {
     { id:'s1', nombre:'Escuela Nacional Tena', clase:'s1', icon:'🏫' },
   ];
 
+  // Solo activos para finanzas
+  const todosActivos = todos.filter(j => j.estado !== 'retirado');
+
   // Meses desde junio hasta hoy
   const mesesActivos = [];
-  for(let i=MES_INICIO; i<=MES_ACTUAL; i++) mesesActivos.push(i);
-  const numMeses = mesesActivos.length;
+  for(let i = MES_INICIO; i <= MES_ACTUAL; i++) mesesActivos.push(i);
 
-  // ── RESUMEN GLOBAL TOP ────────────────────────────────
-  const totalAlumnos  = todos.length;
-  const totalEsperado = totalAlumnos * numMeses * TARIFA;
-  const totalCobrado  = todos.reduce((s,j)=>{
-    const pagados = (j.meses||[]).filter(m=>m>=MES_INICIO && m<=MES_ACTUAL).length;
-    return s + pagados * TARIFA;
+  // TOTALES GLOBALES — cada alumno desde su mes de ingreso
+  const totalEsperado = todosActivos.reduce((s, j) => {
+    const ini = j.ingreso != null ? j.ingreso : MES_INICIO;
+    return s + Math.max(0, MES_ACTUAL - ini + 1) * TARIFA;
+  }, 0);
+  const totalCobrado = todosActivos.reduce((s, j) => {
+    const ini = j.ingreso != null ? j.ingreso : MES_INICIO;
+    const p = (j.meses||[]).filter(m => m >= ini && m <= MES_ACTUAL).length;
+    return s + p * TARIFA;
   }, 0);
   const totalPendiente = totalEsperado - totalCobrado;
 
@@ -1064,28 +1095,29 @@ function renderSucursales() {
     <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;opacity:.6;margin-bottom:10px">RESUMEN GENERAL · ${AÑO}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
       <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-family:'Oswald',sans-serif;font-size:22px;color:var(--gold)">\$${totalEsperado}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:22px;color:var(--gold)">$${totalEsperado}</div>
         <div style="font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.8px;margin-top:2px">Esperado</div>
       </div>
       <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-family:'Oswald',sans-serif;font-size:22px;color:#4ADE80">\$${totalCobrado}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:22px;color:#4ADE80">$${totalCobrado}</div>
         <div style="font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.8px;margin-top:2px">Cobrado</div>
       </div>
       <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-family:'Oswald',sans-serif;font-size:22px;color:#F87171">\$${totalPendiente}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:22px;color:#F87171">$${totalPendiente}</div>
         <div style="font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.8px;margin-top:2px">Pendiente</div>
       </div>
     </div>
     <div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px">
-      <div style="font-size:10px;opacity:.5;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Cobro por mes · $${TARIFA}/alumno</div>
+      <div style="font-size:10px;opacity:.5;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Cobro por mes · $${TARIFA}/alumno activo</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${mesesActivos.map(m => {
-          const cobrado  = todos.reduce((s,j)=>s+((j.meses||[]).includes(m)?TARIFA:0),0);
-          const esperado = totalAlumnos * TARIFA;
-          const pct = esperado ? Math.round(cobrado/esperado*100) : 0;
+          const actEnMes  = todosActivos.filter(j => (j.ingreso != null ? j.ingreso : MES_INICIO) <= m);
+          const cobradoM  = actEnMes.reduce((s,j) => s + ((j.meses||[]).includes(m) ? TARIFA : 0), 0);
+          const esperadoM = actEnMes.length * TARIFA;
+          const pct = esperadoM ? Math.round(cobradoM / esperadoM * 100) : 0;
           return `<div style="flex:1;min-width:52px;background:rgba(255,255,255,.08);border-radius:8px;padding:6px 4px;text-align:center">
             <div style="font-size:10px;font-weight:700;opacity:.7">${MESES[m]}</div>
-            <div style="font-family:'Oswald',sans-serif;font-size:13px;color:${pct===100?'#4ADE80':pct>50?'#FCD34D':'#F87171'}">\$${cobrado}</div>
+            <div style="font-family:'Oswald',sans-serif;font-size:13px;color:${pct===100?'#4ADE80':pct>50?'#FCD34D':'#F87171'}">$${cobradoM}</div>
             <div style="font-size:9px;opacity:.5">${pct}%</div>
           </div>`;
         }).join('')}
@@ -1093,58 +1125,65 @@ function renderSucursales() {
     </div>
   </div>`;
 
-  // ── POR SUCURSAL ──────────────────────────────────────
   SUCURSALES.forEach(suc => {
     const alumnos = todos
       .filter(j => j.sucursal === suc.id)
-      .sort((a,b) => (parseInt(b.edad)||0) - (parseInt(a.edad)||0));
+      .sort((a, b) => (parseInt(b.edad)||0) - (parseInt(a.edad)||0));
 
-    const total      = alumnos.length;
-    const pagaron    = alumnos.filter(j=>(j.meses||[]).includes(MES_ACTUAL)).length;
-    const deben      = total - pagaron;
-    const esperadoS  = total * numMeses * TARIFA;
-    const cobradoS   = alumnos.reduce((s,j)=>{
-      const p = (j.meses||[]).filter(m=>m>=MES_INICIO && m<=MES_ACTUAL).length;
+    const activos    = alumnos.filter(j => j.estado !== 'retirado');
+    const retirados  = alumnos.filter(j => j.estado === 'retirado');
+    const pagaron    = activos.filter(j => (j.meses||[]).includes(MES_ACTUAL)).length;
+    const deben      = activos.length - pagaron;
+
+    const esperadoS  = activos.reduce((s, j) => {
+      const ini = j.ingreso != null ? j.ingreso : MES_INICIO;
+      return s + Math.max(0, MES_ACTUAL - ini + 1) * TARIFA;
+    }, 0);
+    const cobradoS   = activos.reduce((s, j) => {
+      const ini = j.ingreso != null ? j.ingreso : MES_INICIO;
+      const p = (j.meses||[]).filter(m => m >= ini && m <= MES_ACTUAL).length;
       return s + p * TARIFA;
     }, 0);
-    const pendienteS = esperadoS - cobradoS;
-    const cobradoMes = pagaron * TARIFA;
+    const pendienteS  = esperadoS - cobradoS;
+    const cobradoMes  = pagaron * TARIFA;
+    const esperadoMes = activos.length * TARIFA;
 
     out += `
     <div class="suc-header ${suc.clase}">
       <div class="suc-icon">${suc.icon}</div>
       <div style="flex:1">
-        <div class="suc-titulo">SUCURSAL ${suc.id==='s1'?'1':'2'} · ${suc.nombre.toUpperCase()}</div>
+        <div class="suc-titulo">SUCURSAL 1 · ${suc.nombre.toUpperCase()}</div>
         <div class="suc-sub">Tena Juniors · Escuela de Fútbol</div>
         <div class="suc-badges" style="margin-top:6px">
-          <span class="suc-badge">👥 ${total} alumnos</span>
+          <span class="suc-badge">👥 ${activos.length} activos</span>
           <span class="suc-badge">✅ ${pagaron} pagaron</span>
-          ${deben>0?`<span class="suc-badge">⚠️ ${deben} deben</span>`:''}
+          ${deben > 0 ? `<span class="suc-badge">⚠️ ${deben} deben</span>` : ''}
+          ${retirados.length > 0 ? `<span class="suc-badge">🚫 ${retirados.length} retirado${retirados.length>1?'s':''}</span>` : ''}
         </div>
       </div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;margin-top:-4px">
       <div style="background:white;border:1.5px solid var(--border);border-radius:12px;padding:10px;text-align:center">
-        <div style="font-family:'Oswald',sans-serif;font-size:20px;color:var(--navy)">\$${esperadoS}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:20px;color:var(--navy)">$${esperadoS}</div>
         <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Esperado</div>
       </div>
       <div style="background:var(--green-bg);border:1.5px solid #A5D6A7;border-radius:12px;padding:10px;text-align:center">
-        <div style="font-family:'Oswald',sans-serif;font-size:20px;color:var(--green)">\$${cobradoS}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:20px;color:var(--green)">$${cobradoS}</div>
         <div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Cobrado</div>
       </div>
       <div style="background:var(--red-bg);border:1.5px solid #FFCDD2;border-radius:12px;padding:10px;text-align:center">
-        <div style="font-family:'Oswald',sans-serif;font-size:20px;color:var(--red)">\$${pendienteS}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:20px;color:var(--red)">$${pendienteS}</div>
         <div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pendiente</div>
       </div>
     </div>
-    <div style="background:var(--gold);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;margin-top:-4px">
+    <div style="background:var(--gold);border-radius:10px;padding:8px 14px;margin-bottom:12px;margin-top:-4px;display:flex;justify-content:space-between;align-items:center">
       <span style="font-size:12px;font-weight:700;color:var(--navy)">💵 ${MESES[MES_ACTUAL]} (este mes)</span>
-      <span style="font-family:'Oswald',sans-serif;font-size:18px;color:var(--navy)">\$${cobradoMes} / \$${total*TARIFA}</span>
+      <span style="font-family:'Oswald',sans-serif;font-size:18px;color:var(--navy)">$${cobradoMes} / $${esperadoMes}</span>
     </div>`;
 
     if(!alumnos.length){
-      out += `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:16px">Sin alumnos en esta sucursal</div>`;
+      out += `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:16px">Sin alumnos</div>`;
     } else {
       out += `
       <div class="suc-table">
@@ -1155,40 +1194,52 @@ function renderSucursales() {
         </div>`;
 
       alumnos.forEach((j, idx) => {
-        const pagMes       = (j.meses||[]).includes(MES_ACTUAL);
-        const pagadosTotal = (j.meses||[]).filter(m=>m>=MES_INICIO && m<=MES_ACTUAL).length;
+        const esRetirado  = j.estado === 'retirado';
+        const mesIngreso  = j.ingreso != null ? j.ingreso : MES_INICIO;
+        const mesesAlumno = Math.max(0, MES_ACTUAL - mesIngreso + 1);
+        const pagadosTotal= (j.meses||[]).filter(m => m >= mesIngreso && m <= MES_ACTUAL).length;
+        const pagMes      = (j.meses||[]).includes(MES_ACTUAL);
+        const mesesFila   = mesesActivos.filter(m => m >= mesIngreso);
 
         out += `
-        <div class="suc-row" onclick="abrirEditar('${j.id}')">
+        <div class="suc-row" onclick="abrirEditar('${j.id}')" style="${esRetirado ? 'opacity:0.45;' : ''}">
           <div>
             <span class="num-rank">${idx+1}</span>
             <span class="suc-nombre">${j.nombre}</span>
-            <div style="font-size:10px;color:var(--muted);margin-top:1px;padding-left:22px">${j.cat||''} ${j.posicion?'· '+j.posicion:''}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;padding-left:22px">${j.cat||''} ${j.posicion ? '· '+j.posicion : ''}</div>
             <div style="font-size:10px;padding-left:22px;margin-top:2px">
-              ${mesesActivos.map(m=>`<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;margin:1px;${(j.meses||[]).includes(m)?'background:#E8F5EE;color:#1B8A4E':'background:#FDECEA;color:#C0392B'}">${MESES[m]}</span>`).join('')}
+              ${esRetirado
+                ? '<span style="font-size:10px;color:#D46B08;font-weight:700">🚫 Retirado</span>'
+                : mesesFila.map(m => `<span style="display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;margin:1px;${(j.meses||[]).includes(m)?'background:#E8F5EE;color:#1B8A4E':'background:#FDECEA;color:#C0392B'}">${MESES[m]}</span>`).join('')
+              }
             </div>
           </div>
-          <div class="suc-edad">${j.edad?j.edad+'a':'—'}</div>
+          <div class="suc-edad">${j.edad ? j.edad+'a' : '-'}</div>
           <div class="suc-pago">
-            ${pagMes
-              ? '<span class="badge-mini badge-green">✓ $'+TARIFA+'</span>'
-              : '<span class="badge-mini badge-red">✗ Debe</span>'}
-            <div style="font-size:9px;color:var(--muted);margin-top:3px;text-align:right">\$${pagadosTotal*TARIFA}/${numMeses*TARIFA}</div>
+            ${esRetirado
+              ? '<span class="badge-mini badge-orange">🚫</span>'
+              : pagMes
+                ? '<span class="badge-mini badge-green">✓ $'+TARIFA+'</span>'
+                : '<span class="badge-mini badge-red">✗ Debe</span>'
+            }
+            <div style="font-size:9px;color:var(--muted);margin-top:3px;text-align:right">
+              ${esRetirado ? '' : '$'+(pagadosTotal*TARIFA)+'/$'+(mesesAlumno*TARIFA)}
+            </div>
           </div>
         </div>`;
       });
 
-      out += `</div>`; // cierre suc-table
+      out += `</div>`;
     }
   });
 
-  // Alumnos sin sucursal
-  const sinSuc = todos.filter(j=>!j.sucursal);
+  // Sin sucursal
+  const sinSuc = todos.filter(j => !j.sucursal && j.estado !== 'retirado');
   if(sinSuc.length){
     out += `
     <div style="background:var(--orange-bg);border:1.5px solid #F5C800;border-radius:14px;padding:12px 16px;margin-top:4px">
-      <div style="font-weight:700;font-size:13px;color:var(--orange);margin-bottom:8px">⚠️ Sin sucursal asignada (${sinSuc.length}) — toca para editar</div>
-      ${sinSuc.map(j=>`<div style="font-size:13px;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.1);cursor:pointer" onclick="abrirEditar('${j.id}')">${j.nombre} · ${j.cat||'—'}</div>`).join('')}
+      <div style="font-weight:700;font-size:13px;color:var(--orange);margin-bottom:8px">⚠️ Sin sucursal asignada (${sinSuc.length})</div>
+      ${sinSuc.map(j=>`<div style="font-size:13px;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.1);cursor:pointer" onclick="abrirEditar('${j.id}')">${j.nombre} · ${j.cat||'-'}</div>`).join('')}
     </div>`;
   }
 
